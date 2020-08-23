@@ -1,0 +1,52 @@
+# Setup
+title:               Depmix
+tagline:             'Dependent mixture models (aka hidden Markov models)'
+description:         'A reserved <a href="https://jekyllrb.com" target="_blank">Jekyll</a> theme that places the utmost gravity on content with a hidden drawer. Made by <a href="https://twitter.com/mdo" target="_blank">@mdo</a>.'
+url:                 http://lanyon.getpoole.com
+baseurl:             ''
+paginate:            5
+permalink:           pretty
+
+hmmr:
+  title:             hmmr
+  tagline:           'Mixture and hidden Markov models in R'
+  description:       'A book about mixture and hidden Markov models in R. Materials and R package'
+  url:               https://depmix.github.io/hmmr/
+  baseurl:           ''
+  permalink:         pretty
+  github:
+    book:
+      repo:           https://github.com/depmix/hmmr-book
+    package:
+      repo:           https://github.com/depmix/hmmr
+depmixS4:
+  title:             depmixS4
+  tagline:           'An R package to fit mixture and hidden Markov models'
+  description:       'depmixS4 was designed for flexibility and allows you to construct and estimate a wide variety of mixture and hidden Markov models.'
+  url:               https://depmix.github.io/depmixS4/
+  baseurl:           ''
+  permalink:         pretty
+  github:
+    repo:           https://github.com/depmix/depmixS4
+
+
+# About/contact
+author:
+  maarten:
+    name:              Maarten Speekenbrink
+    url:               https://speekenbrink-lab.github.io/
+    email:             m.speekenbrink@ucl.ac.uk
+  ingmar:
+    name:              Ingmar Visser
+    url:               https://ingmar.org
+    email:             i.visser@uva.nl
+
+# Gems
+#plugins:
+#  - jekyll-paginate
+
+# Custom vars
+version:             1.1.0
+github:
+  repo:              https://github.com/depmix
+#google_analytics_id: #UA-XXXX-Y
