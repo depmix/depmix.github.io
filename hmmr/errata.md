@@ -4,4 +4,5 @@ title: Errata
 category: hmmr
 ---
 
-Here's a list of errata that we are aware of:
+Here we will collect errata that we are aware of.
+At the moment, we don't have any :-)

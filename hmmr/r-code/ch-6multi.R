@@ -1,4 +1,4 @@
-## ----setup, echo=FALSE, results='hide', message = FALSE, warning = FALSE----
+## ----setup, echo=FALSE, results='hide', message = FALSE, warning = FALSE---------------------------------------
 options(prompt = "R> ", continue = "+  ", width = 60,
   digits = 4, show.signif.stars = FALSE, 
   useFancyQuotes = FALSE)
@@ -82,16 +82,16 @@ set.seed(1072)
 
 
 
-## ----include = FALSE-----------------------------------------------
+## ----include = FALSE-------------------------------------------------------------------------------------------
 opts_chunk$set(cache.path = "cache/ch6/", fig.path = "figure/ch6/")
 
 
 
-## ----ch6-init,echo=FALSE-------------------------------------------
+## ----ch6-init,echo=FALSE---------------------------------------------------------------------------------------
 require("hmmr")
 
 
-## ----balance8learndevelopch6, echo=FALSE, fig.height=.8*5, fig.width=.8*7----
+## ----balance8learndevelopch6, echo=FALSE, fig.height=.8*5, fig.width=.8*7--------------------------------------
 library(hmmr)
 data(balance8)
 par(mar=c(5,4,1,1))
@@ -109,12 +109,12 @@ lines(1:8,colMeans(pc, na.rm=TRUE), type="b",lty=2)
 legend("bottomright",inset=.0,legend=c("learning","development"),lty=c(2,1),bty="n")
 
 
-## ----balance8glm,linewidth=62--------------------------------------
+## ----balance8glm,linewidth=62----------------------------------------------------------------------------------
 summary(glm(cbind(totalCor,totalTrials-totalCor)~scale(age)+ 
             sex+I(time-1), family=binomial, data=balance8))
 
 
-## ----balance8-sumscoreslearn, echo=FALSE, fig.height=.8*4.5, fig.width=.8*7,out.width=".9\\textwidth"----
+## ----balance8-sumscoreslearn, echo=FALSE, fig.height=.8*4.5, fig.width=.8*7,out.width=".9\\textwidth"----------
 require("hmmr")
 data(balance8)
 par(mar=c(4,4,3,0))
@@ -137,7 +137,7 @@ barplot((table(dt$cdc)/nrow(dt)),ylim=c(0,up),main="conflict-distance",xlab="Sum
 
 
 
-## ----balance8-sumscoresdevelop, echo=FALSE, fig.height=.8*4.5, fig.width=.8*7,out.width=".9\\textwidth"----
+## ----balance8-sumscoresdevelop, echo=FALSE, fig.height=.8*4.5, fig.width=.8*7,out.width=".9\\textwidth"--------
 require("hmmr")
 data(balance8)
 
@@ -160,7 +160,7 @@ barplot((table(dt$cwc)/nrow(dt)),ylim=c(0,up),main="conflict-weight",xlab="Sum s
 barplot((table(dt$cdc)/nrow(dt)),ylim=c(0,up),main="conflict-distance",xlab="Sum score")
 
 
-## ----fit-balance8models, eval=FALSE, linewidth=62------------------
+## ----fit-balance8models, eval=FALSE, linewidth=62--------------------------------------------------------------
 ## 
 ## library(hmmr)
 ## data(balance8)
@@ -195,10 +195,33 @@ barplot((table(dt$cdc)/nrow(dt)),ylim=c(0,up),main="conflict-distance",xlab="Sum
 ## fhm4id <- multistart(hm4id)
 
 
-## ----load-balance8models, echo=FALSE, results='hide'---------------
-
-library(hmmr)
-data(balance8models)
+## ----load-balance8models, echo=FALSE, results='hide'-----------------------------------------------------------
+require(hmmr)
+data(balance8)
+data(balance8pars)
+# reconstruct the list of fitted models from the parameters
+balance8models <- list()
+for(i in 1:length(balance8pars)) {
+  # define model
+  mod <- depmix(list(cbind(wc,wi)~1,cbind(dc,di)~1,cbind(cwc,cwi)~1,
+    cbind(cdc,cdi)~1,cbind(cbc,cbi)~1), 
+    data=balance8, family=list(binomial("identity"),binomial("identity"),
+    binomial("identity"),binomial("identity"),binomial("identity")), 
+    ntimes=rep(8,1004), ns=attr(balance8pars[[i]],"nstates"))
+  # set the parameters to the estimated ones
+  mod <- setpars(mod, balance8pars[[i]])
+  # convert to a depmix.fitted object
+  mod <- as(mod,"depmix.fitted")
+  # set slots of depmix.fitted object
+  mod@message <- attr(balance8pars[[i]],"message")
+  mod@conMat <- attr(balance8pars[[i]],"conMat")
+  mod@lin.upper <- attr(balance8pars[[i]],"lin.upper")
+  mod@lin.lower <- attr(balance8pars[[i]],"lin.lower")
+  mod@posterior <- viterbi(mod)
+  # add to list of models
+  balance8models[[i]] <- mod
+}
+names(balance8models) <- c("fhm3id","fhm4id","fhm5id","fhm6id","fhm7id","fhm8id")
 
 resp5 <- summary(balance8models[[3]],"response")
 resp6 <- summary(balance8models[[4]],"response")
@@ -207,7 +230,7 @@ resp8 <- summary(balance8models[[6]],"response")
 
 
 
-## ----balance8-profiles, echo=FALSE, fig.height=7, fig.width=7,out.width=".8\\textwidth"----
+## ----balance8-profiles, echo=FALSE, fig.height=7, fig.width=7,out.width=".8\\textwidth"------------------------
 layout(matrix(1:4,nrow=2,ncol=2,byrow=TRUE))
 matplot(t(resp5),ty="b",frame=FALSE, xlab="w-d-cw-cd-cb", main="5-state",col="black",ylab="p(correct)")
 matplot(t(resp6),ty="b",frame=FALSE, xlab="w-d-cw-cd-cb", main="6-state",col="black",ylab="")
@@ -215,11 +238,11 @@ matplot(t(resp7),ty="b",frame=FALSE, xlab="w-d-cw-cd-cb", main="7-state",col="bl
 matplot(t(resp8),ty="b",frame=FALSE, xlab="w-d-cw-cd-cb", main="8-state",col="black",ylab="")
 
 
-## ----model-summary, echo=FALSE-------------------------------------
+## ----model-summary, echo=FALSE---------------------------------------------------------------------------------
 summary(balance8models[[6]], which="transition")
 
 
-## ----balance8-learning-regression, echo=FALSE, fig.height=.9*3.5, fig.width=.9*8,out.width=".8\\textwidth"----
+## ----balance8-learning-regression, echo=FALSE, fig.height=.9*3.5, fig.width=.9*8,out.width=".8\\textwidth"-----
 par(mar=c(4,4,3,1))
 pst <- posterior(balance8models[[6]], type = "global")
 balance8$pst <- pst
@@ -238,7 +261,7 @@ plot(as.ts(colMeans(dcorrect,na.rm=TRUE)/5),ylim=c(0,1),frame=FALSE, ylab="p(cor
 
 
 
-## ----balance8-regression, echo=FALSE, fig.height=.9*3.5, fig.width=.9*4,out.width=".4\\textwidth"----
+## ----balance8-regression, echo=FALSE, fig.height=.9*3.5, fig.width=.9*4,out.width=".4\\textwidth"--------------
 par(mar=c(4,4,3,1))
 
 pst <- posterior(balance8models[[6]], type="global")
@@ -256,27 +279,27 @@ balance8$pst[1] <- 3
 
 
 
-## ----data-speed1, echo=FALSE---------------------------------------
+## ----data-speed1, echo=FALSE-----------------------------------------------------------------------------------
 data(speed1)
 data(speed)
 
 
-## ----data-speed, echo=FALSE----------------------------------------
+## ----data-speed, echo=FALSE------------------------------------------------------------------------------------
 data(speed)
 speed$pa2 <- speed$Pacc^2
 
 
-## ----speed-lm, echo=TRUE-------------------------------------------
+## ----speed-lm, echo=TRUE---------------------------------------------------------------------------------------
 fitlm <- manova(cbind(rt,corr)~Pacc+prev+I(Pacc^2),
                 data=speed)
 summary(fitlm)
 
 
-## ----speed-lm-2, echo=TRUE-----------------------------------------
+## ----speed-lm-2, echo=TRUE-------------------------------------------------------------------------------------
 summary.aov(fitlm)
 
 
-## ----speed-hm2, echo=TRUE------------------------------------------
+## ----speed-hm2, echo=TRUE--------------------------------------------------------------------------------------
 hm2 <- depmix(list(rt~1,corr~1), data=speed, nstates=2,
 	family=list(gaussian(), multinomial("identity")), 
 	ntimes=c(168,134,137))
@@ -285,7 +308,7 @@ fhm2 <- fit(hm2)
 summary(fhm2)
 
 
-## ----speed-hm2tr, echo=TRUE----------------------------------------
+## ----speed-hm2tr, echo=TRUE------------------------------------------------------------------------------------
 hm2tr <- depmix(list(rt~1,corr~1), data=speed, nstates=2,
             family=list(gaussian(),multinomial("identity")), 
             ntimes=c(168,134,137), transition=~Pacc)
@@ -293,19 +316,19 @@ set.seed(1)
 fhm2tr <- fit(hm2tr)
 
 
-## ----speed-hm2-2, echo=TRUE----------------------------------------
+## ----speed-hm2-2, echo=TRUE------------------------------------------------------------------------------------
 summary(fhm2tr,which="response") 
 
 
-## ----speed-hm2tr-sum, echo=TRUE------------------------------------
+## ----speed-hm2tr-sum, echo=TRUE--------------------------------------------------------------------------------
 summary(fhm2tr,which="transition") 
 
 
-## ----speed-hm2tr-pars, echo=FALSE----------------------------------
+## ----speed-hm2tr-pars, echo=FALSE------------------------------------------------------------------------------
 pars <- getpars(fhm2tr)
 
 
-## ----speed-hm2tr-plot, echo=TRUE, eval=FALSE-----------------------
+## ----speed-hm2tr-plot, echo=TRUE, eval=FALSE-------------------------------------------------------------------
 ## pars <- getpars(fhm2tr)
 ## logit1 <- function(value) plogis(pars[4]+value*pars[6])
 ## logit2 <- function(value) plogis(pars[8]+value*pars[10])
@@ -319,7 +342,7 @@ pars <- getpars(fhm2tr)
 ## 	lty=c(1,2),bty="n")
 
 
-## ----fig-speed-fitted-transition, echo=FALSE, fig.height=.8*5, fig.width=.8*7, out.width=".7\\textwidth"----
+## ----fig-speed-fitted-transition, echo=FALSE, fig.height=.8*5, fig.width=.8*7, out.width=".7\\textwidth"-------
 pars <- getpars(fhm2tr)
 logit1 <- function(value) plogis(pars[4]+value*pars[6])
 logit2 <- function(value) plogis(pars[8]+value*pars[10])
@@ -333,7 +356,7 @@ legend("bottomright",
 	lty=c(1,2),bty="n")
 
 
-## ----speed-hm2trConstr, echo=TRUE----------------------------------
+## ----speed-hm2trConstr, echo=TRUE------------------------------------------------------------------------------
 pars <- getpars(fhm2tr)
 pars[13] <- 0.5
 pars[14] <- 0.5 
@@ -345,16 +368,16 @@ pars[c(11,15)] <- pars[c(11,15)] + rnorm(2,sd=.5)
 hm2trConstr <- setpars(hm2tr,pars)
 
 
-## ----speed-hm2trConstr-fit, echo=TRUE, warning=FALSE, linewidth=62----
+## ----speed-hm2trConstr-fit, echo=TRUE, warning=FALSE, linewidth=62---------------------------------------------
 free <- c(1,1,rep(c(0,1),4),1,1,0,0,1,1,1,1)
 fhm2trConstr <- fit(hm2trConstr,fixed=!free)
 
 
-## ----speed-hm2trConstr-llratio, echo=TRUE--------------------------
+## ----speed-hm2trConstr-llratio, echo=TRUE----------------------------------------------------------------------
 llratio(fhm2tr,fhm2trConstr)
 
 
-## ----speed-hm2-scale, echo=TRUE, results='hide'--------------------
+## ----speed-hm2-scale, echo=TRUE, results='hide'----------------------------------------------------------------
 hm2tr <- depmix(list(rt~1,corr~1), data=speed, nstates=2,
   family=list(gaussian(),multinomial("identity")), 
 	ntimes=c(168,134,137), transition=~scale(Pacc))
@@ -362,7 +385,7 @@ set.seed(1)
 fhm2tr <- fit(hm2tr)
 
 
-## ----speed-hm2trConstr-2, echo=FALSE,results='hide'----------------
+## ----speed-hm2trConstr-2, echo=FALSE,results='hide'------------------------------------------------------------
 pars <- getpars(fhm2tr)
 pars[13] <- pars[14] <- 0.5
 pars[c(1,2)] <- c(.5,.5) # set uniform initial probabilities
@@ -373,7 +396,7 @@ free <- c(1,1,rep(c(0,1),4),1,1,0,0,1,1,1,1)
 fhm2trConstr <- fit(hm2trConstr,fixed=!free)
 
 
-## ----speed-hm2-hyst, echo=TRUE, results='hide'---------------------
+## ----speed-hm2-hyst, echo=TRUE, results='hide'-----------------------------------------------------------------
 pars <- getpars(fhm2tr)
 pars[13] <- pars[14] <- 0.5
 pars[6] <- pars[10] <- 3
@@ -389,11 +412,11 @@ conpat[6] <- conpat[10] <- 2
 fhyst <- fit(hyst,equal=conpat)
 
 
-## ----hyst-base-llr, echo=TRUE--------------------------------------
+## ----hyst-base-llr, echo=TRUE----------------------------------------------------------------------------------
 llratio(fhm2trConstr,fhyst)
 
 
-## ----speed-hm2-no-hyst1, echo=TRUE, results='hide'-----------------
+## ----speed-hm2-no-hyst1, echo=TRUE, results='hide'-------------------------------------------------------------
 # reset earlier constrained parameters
 pars[c(6,10)] <- getpars(fhm2tr)[c(6,10)] # reset values
 conpat[c(6,10)] <- 1 # set as free
@@ -404,14 +427,14 @@ nohyst1 <- setpars(hm2tr,pars) # assign initial values
 fnohyst1 <- fit(nohyst1,equal=conpat)
 
 
-## ----speed-hm2-2-no-hyst2, echo=TRUE, results='hide'---------------
+## ----speed-hm2-2-no-hyst2, echo=TRUE, results='hide'-----------------------------------------------------------
 pars[6] <- pars[10] <- 3 # set values
 conpat[6] <- conpat[10] <- 3 # set equality of betas
 nohyst2 <- setpars(hm2tr,pars)
 fnohyst2 <- fit(nohyst2,equal=conpat)
 
 
-## ----speed-hyst-models-gof, echo=FALSE, results='asis'-------------
+## ----speed-hyst-models-gof, echo=FALSE, results='asis'---------------------------------------------------------
 require(xtable)
 m<-list()
 m[[1]]<-fhm2tr
@@ -449,7 +472,7 @@ xt <- xtable(gof,
 print(xt, include.rownames=FALSE, caption.placement="top", table.placement = "th")
 
 
-## ----speed-rescor, echo=FALSE, results='hide'----------------------
+## ----speed-rescor, echo=FALSE, results='hide'------------------------------------------------------------------
 speed$stateGaus <- posterior(fhyst, type="global")
 require(polycor)
 corr=hetcor(speed$rt[speed$state==2],speed$corr[speed$state==2])
@@ -460,19 +483,19 @@ rhoFG=corr$correlations[1,2]
 steFG=corr$std.errors[1,2]
 
 
-## ----speed-rescor-SC, linewidth=55---------------------------------
+## ----speed-rescor-SC, linewidth=55-----------------------------------------------------------------------------
 require(polycor)
 hstate <- posterior(fhyst, type="global")
 polyserial(speed$rt[hstate==2], speed$corr[hstate==2],
            ML=TRUE, std.err=TRUE)
 
 
-## ----speed-rescor-SC-2, linewidth=55-------------------------------
+## ----speed-rescor-SC-2, linewidth=55---------------------------------------------------------------------------
 polyserial(speed$rt[hstate==1],speed$corr[hstate==1],
            ML=TRUE, std.err=TRUE)
 
 
-## ----fig-speed-rescor, echo=FALSE, fig.height=4, fig.width=7,out.width=".8\\textwidth"----
+## ----fig-speed-rescor, echo=FALSE, fig.height=4, fig.width=7,out.width=".8\\textwidth"-------------------------
 layout(matrix(c(1,2),ncol=2))
 plot(speed$corr[speed$state==1],speed$rt[speed$state==1],ylim=c(4.5,7.5), 
 		main="Fast guessing state",ylab="RT (log ms)",frame.plot=FALSE, xlab="")
@@ -480,14 +503,14 @@ plot(speed$corr[speed$state==2],speed$rt[speed$state==2],ylim=c(4.5,7.5),
 		main="Stimulus controlled state",ylab="RT (log ms)",frame.plot=FALSE, xlab="")
 
 
-## ----speed-rescor-mod, echo=TRUE-----------------------------------
+## ----speed-rescor-mod, echo=TRUE-------------------------------------------------------------------------------
 hm2rescor <- depmix(list(rt~corr,corr~1),data=speed,
 	nstates=2,
 	family=list(gaussian(),multinomial("identity")), 
 	ntimes=c(168,134,137), transition=~scale(Pacc))
 
 
-## ----speed-fit-rescor-mod, echo=FALSE, results='hide'--------------
+## ----speed-fit-rescor-mod, echo=FALSE, results='hide'----------------------------------------------------------
 set.seed(1)
 fhm2rescor <- fit(hm2rescor,verb=FALSE)
 pars <- getpars(fhm2rescor)
@@ -506,7 +529,7 @@ bic4b<-BIC(fhm2rescorCo)
 llrat4b <- llratio(fhm2rescorCo,fhyst)
 
 
-## ----speed-exGauss-def, echo=FALSE, results='hide'-----------------
+## ----speed-exGauss-def, echo=FALSE, results='hide'-------------------------------------------------------------
 require(gamlss)
 require(gamlss.dist)
 
@@ -634,7 +657,7 @@ setMethod("predict","exgaus",
 )
 
 
-## ----speed-exGauss, echo=FALSE, results='hide'---------------------
+## ----speed-exGauss, echo=FALSE, results='hide'-----------------------------------------------------------------
 rModels <- list( list( # the full models
 	exgaus(speed$rt, as.numeric(speed$corr), pstart=c(5,0,.1,.1)),
 	GLMresponse(formula=corr~1,data=speed,family=multinomial("identity"),pstart=c(0.5,0.5))
@@ -697,7 +720,7 @@ exg2 <- setpars(exg1,pars)
 fexg2 <- fit(exg2,equal=conpat) # constrained ExGaussian hysteresis model
 
 
-## ----fig-speed-rtdist, echo=FALSE, fig.height=.9*5, fig.width=.9*7, out.width=".8\\textwidth"----
+## ----fig-speed-rtdist, echo=FALSE, fig.height=.9*5, fig.width=.9*7, out.width=".8\\textwidth"------------------
 par(mar=c(4,4,3,1))
 pc <- c(table(speed$stateGaus,speed$corr)/439)
 
@@ -743,7 +766,7 @@ curve(c4,add=TRUE)
 
 
 
-## ----fig-exgaus-distpars, echo=FALSE, results='hide'---------------
+## ----fig-exgaus-distpars, echo=FALSE, results='hide'-----------------------------------------------------------
 speed$stateExG <- posterior(fexg2, type="global")
 pc <- c(table(speed$stateExG,speed$corr)/439)# exgaus model distributies
 pc <- rep(1,4)
@@ -775,7 +798,7 @@ exb <- 0.15
 yl <- 2.7
 
 
-## ----fig-speed-exgaus, echo=FALSE, fig.height=.9*5, fig.width=.9*7, out.width=".8\\textwidth"----
+## ----fig-speed-exgaus, echo=FALSE, fig.height=.9*5, fig.width=.9*7, out.width=".8\\textwidth"------------------
 par(mar=c(4,4,3,1))
 layout(matrix(c(1:4),ncol=2))
 truehist(speed$rt[speed$stateExG==1&speed$corr=="inc"],main="Fast Guessing - incorrect",
@@ -795,7 +818,7 @@ truehist(speed$rt[speed$stateExG==2&speed$corr=="cor"],main="Stimulus controlled
 curve(c4,add=TRUE)
 
 
-## ----fit-IGT-hmm-1, results='hide'---------------------------------
+## ----fit-IGT-hmm-1, results='hide'-----------------------------------------------------------------------------
 data(IGT)
 set.seed(345)
 indep2 <- depmix(response=list(deck~1,wager~1), data=IGT,
@@ -808,11 +831,11 @@ indep3 <- depmix(response=list(deck~1,wager~1), data=IGT,
 findep3 <- fit(indep3)
 
 
-## ----IGT-fmod3a-summary--------------------------------------------
+## ----IGT-fmod3a-summary----------------------------------------------------------------------------------------
 summary(findep3)
 
 
-## ----fit-IGT-hmm-2, results='hide'---------------------------------
+## ----fit-IGT-hmm-2, results='hide'-----------------------------------------------------------------------------
 set.seed(45)
 dep2 <- depmix(response=list(deck~1,wager~gdeck+fdeck), 
 	family=list(multinomial("identity"),binomial()), 
@@ -820,14 +843,14 @@ dep2 <- depmix(response=list(deck~1,wager~gdeck+fdeck),
 fdep2 <- fit(dep2)
 
 
-## ----fit-IGT-hmm-3, echo=FALSE,results='hide'----------------------
+## ----fit-IGT-hmm-3, echo=FALSE,results='hide'------------------------------------------------------------------
 dep3 <- depmix(response=list(deck~1,wager~gdeck+fdeck),data=IGT,
     family=list(multinomial("identity"),binomial()),nstates=3,
     ntimes=rep(100,30))
 fdep3 <- fit(dep3)
 
 
-## ----IGT-gof, echo=FALSE, results='asis'---------------------------
+## ----IGT-gof, echo=FALSE, results='asis'-----------------------------------------------------------------------
 require(xtable)
 m<-list()
 m[[1]]<-findep2
@@ -849,10 +872,10 @@ xt <- xtable(gof,
 print(xt, include.rownames=FALSE, caption.placement="top", table.placement = "tbh")
 
 
-## ----IGT-fmod3b-results--------------------------------------------
+## ----IGT-fmod3b-results----------------------------------------------------------------------------------------
 summary(fdep3,which="response")
 
-## ----IGT-wager-probs,echo=FALSE------------------------------------
+## ----IGT-wager-probs,echo=FALSE--------------------------------------------------------------------------------
 prs1 <- getpars(fdep3)[17:19]
 prs2 <- getpars(fdep3)[24:26]
 prs3 <- getpars(fdep3)[31:33]
@@ -865,21 +888,21 @@ probs2 <- round(1/(1+exp(-1*(mm %*% prs2))),3)
 probs3 <- round(1/(1+exp(-1*(mm %*% prs3))),3)
 
 
-## ----echo=FALSE----------------------------------------------------
+## ----echo=FALSE------------------------------------------------------------------------------------------------
 se <- standardError(fdep3)
 conf <- confint(fdep3)
 mtab <- round(cbind(se,conf[,c(3,4)])[c(17:19,24:26,31:33),-2],3)
 
 
-## ------------------------------------------------------------------
+## --------------------------------------------------------------------------------------------------------------
 llratio(fdep3,findep3)
 
 
-## ------------------------------------------------------------------
+## --------------------------------------------------------------------------------------------------------------
 summary(fdep3,which="prior")
 
 
-## ----IGT-posterior-plot,echo=FALSE,fig.width=6.5,fig.height=5.2,out.width=".8\\textwidth"----
+## ----IGT-posterior-plot,echo=FALSE,fig.width=6.5,fig.height=5.2,out.width=".8\\textwidth"----------------------
 post <- posterior(fdep3, type="smoothing")
 post <- aggregate(post~IGT$trial,FUN=mean)
 plot(c(1,100),c(0,1),type="n",xlab="trial",ylab=expression(p(S[t] == i)))
@@ -889,11 +912,11 @@ lines(1:100,post[,4],lty=3)
 legend(100,1,lty=1:3,legend=c("S1","S2","S3"),xjust=1,yjust=1,bty="n")
 
 
-## ------------------------------------------------------------------
+## --------------------------------------------------------------------------------------------------------------
 summary(fdep3,which="transition")
 
 
-## ----IGT-mod3c-----------------------------------------------------
+## ----IGT-mod3c-------------------------------------------------------------------------------------------------
 IGT$prevloss <- c(0,IGT$loss[-nrow(IGT)]) > 0
 IGT$prevloss[IGT$trial==1] <- FALSE
 set.seed(56)
@@ -904,11 +927,11 @@ dep3cov <- depmix(response=list(deck~1,wager~gdeck+fdeck),
 fdep3cov <- fit(dep3cov)
 
 
-## ----IGT-llratio-fmod3b-fmod3c-------------------------------------
+## ----IGT-llratio-fmod3b-fmod3c---------------------------------------------------------------------------------
 llratio(fdep3cov,fdep3)
 
 
-## ----echo=FALSE----------------------------------------------------
+## ----echo=FALSE------------------------------------------------------------------------------------------------
 pts1 <- matrix(getpars(fdep3cov)[4:9],ncol=2)
 pts2 <- matrix(getpars(fdep3cov)[10:15],ncol=2)
 pts3 <- matrix(getpars(fdep3cov)[16:21],ncol=2)

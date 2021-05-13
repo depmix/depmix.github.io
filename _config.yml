@@ -10,7 +10,7 @@ permalink:           pretty
 hmmr:
   title:             hmmr
   tagline:           'Mixture and hidden Markov models with R'
-  description:       'A book about defining and estimating mixture and hidden Markov models with R and an accompanying R package'
+  description:       'A book about constructing, estimating, and testing mixture and hidden Markov models with R and the accompanying R package hmmr.'
   url:               https://depmix.github.io/hmmr/
   baseurl:           ''
   permalink:         pretty
@@ -21,7 +21,7 @@ hmmr:
       repo:           https://github.com/depmix/hmmr
 depmixS4:
   title:             depmixS4
-  tagline:           'An R package to fit mixture and hidden Markov models'
+  tagline:           'An R package to construct and fit mixture and hidden Markov models.'
   description:       'depmixS4 was designed for flexibility and allows you to construct and estimate a wide variety of mixture and hidden Markov models.'
   url:               https://depmix.github.io/depmixS4/
   baseurl:           ''
@@ -46,7 +46,7 @@ author:
 #  - jekyll-paginate
 
 # Custom vars
-version:             1.1.0
-github:
-  repo:              https://github.com/depmix
+#version:             1.1.0
+#github:
+#  repo:              https://github.com/depmix
 #google_analytics_id: #UA-XXXX-Y
